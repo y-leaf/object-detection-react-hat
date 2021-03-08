@@ -150,7 +150,7 @@ to the `<PUBLIC_IP>:32001` and `http`.
 4. To deploy the services to the IBM Cloud Kubernetes Service, run:
 
 ```bash
-kubectl apply -f ./deploy/object-detection-deploy.yaml
+kubectl apply -f object-detection-deploy.yaml
 
 
 ## Confirm the services are running - this may take a minute

@@ -53,6 +53,8 @@ Follow these steps to set up and run this code pattern locally and on the cloud.
 3. [Deploy to IBM Cloud Kubernetes Service](#3-deploy-to-ibm-cloud-kubernetes-service)
 
 
+--------------------
+
 ### 1. Run the application locally
 
 1. Install packages with NPM by running `npm install`.
@@ -67,6 +69,8 @@ if you have your own TensorFlow.js model, copy the `model_web` directory generat
 
 4. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
+
+--------------------
 
 ### 2. Build a docker image, then run it locally
 
@@ -100,6 +104,8 @@ You should now see the object-detection microservice up and running
 Explore the microservice at
 >  [http://localhost:3000](http://localhost:3000) for documentation
 
+
+--------------------
 
 ### 3. Deploy to IBM Cloud Kubernetes Service
 

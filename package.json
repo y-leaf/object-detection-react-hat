@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Real-time custom object detection with TensorFlow.js",
   "keywords": [],
-  "repository": "https://github.com/cloud-annotations/object-detection-react",
+  "repository": "https://github.com/y-leaf/object-detection-react-hat",
   "license": "MIT",
   "type": "module",
   "main": "src/index.js",

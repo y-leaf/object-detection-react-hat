@@ -50,7 +50,7 @@ Follow these steps to set up and run this code pattern locally and on the cloud.
 
 1. [Run the application locally](#1-run-the-application-locally)
 2. [Build a docker image, then run it locally](#2-Build-a-docker-image-then-run-it-locally)
-3. [Deploy to IBM Cloud](#3-deploy-to-ibm-cloud)
+3. [Deploy to IBM Cloud Kubernetes Service](#3-deploy-to-ibm-cloud-kubernetes-service)
 
 
 ### 1. Run the application locally
@@ -101,7 +101,7 @@ Explore the microservice at
 >  [http://localhost:3000](http://localhost:3000) for documentation
 
 
-### 4. Deploy to IBM Cloud
+### 3. Deploy to IBM Cloud Kubernetes Service
 
 1. To allow changes to the this microservice, create a repo on [Docker Cloud](https://cloud.docker.com/) where you can push the new modified containers. 
 

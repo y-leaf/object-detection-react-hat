@@ -80,22 +80,20 @@ Since this app requires to access to the client's PC camera, you need to create 
 
 While setting up a SSL certificate, a private key and a Certificate Signing Request (CSR) must be generated to pass information between the Certificate Authority and web host. Once the CSR has been created it will generate a Certificate (CRT).
 
-1. Preparation
+1. Install OpenSSL
 
-# < Install OpenSSL >
 Confirm if you have already installed
-
 ```bash
 openssl --version
 ```
 
 if you haven't, install it by:
-
 ```bash
 sudo yum install -y openssl
 ```
 
-# <Create a directory for SSL>
+
+2. Create a directory for SSL
 
 ```bash
 cd ./nginx
@@ -103,13 +101,15 @@ mkdir ssl
 cd ssl
 ```
 
-2. Creat Private Key
+
+3. Creat Private Key
 
 ```bash
 openssl genrsa -out server.key 3072
 ```
 
-3. Create CSR (Certificate Signing Request)
+
+4. Create CSR (Certificate Signing Request)
 
 ```bash
 openssl req -new -key server.key -out server.csr
@@ -117,13 +117,15 @@ openssl req -new -key server.key -out server.csr
 
 You will be asked to input several information such as Contry Name and Organization name, you can simply skip them by typing 'Enter'.
 
-4. Generate CRT (Certification)
+
+5. Generate CRT (Certification)
 
 ```bash
 openssl x509 -days 3650 -req -signkey server.key -in server.csr -out server.crt
 ```
 
-# Congratulations! Now you have Self-Signed SSL Certificate for nginx container.
+
+Congratulations! Now you have Self-Signed SSL Certificate for nginx container.
 
 
 --------------------
@@ -149,10 +151,10 @@ docker-compose build
 docker-compose up -d
 ```
 
-Great!  So, now you should now see the object-detection microservice up and running
 
-Explore the microservice at
->  [https://localhost](https://localhost)
+Great!  So, you should now see the object-detection microservice up and running
+
+Explore the microservice at [https://localhost](https://localhost)
 
 
 --------------------
@@ -182,12 +184,13 @@ ibmcloud cs cluster-config --cluster <$CLUSTER_NAME OR $CLUSTER_ID>
 Update the `env` values `HOST_IP` in line #15 of [object-detection-deploy.yaml](object-detection-deploy.yaml)
 to the `<PUBLIC_IP>`.
 
+
 * Run `docker images` and confirm you have two images for this app, note your images' names.
 
 Update the `containers` values `name`in line #9, 18 of [object-detection-deploy.yaml](object-detection-deploy.yaml)
 to the `<IMAGE_NAME:TAG>`.
 
-> NOTE change images' names to pull the images to the kubernetes clusters if the images don't have the specified user name.
+> Note: Change images' names to pull the images to the kubernetes clusters if the images don't have the specified user name.
 
 ```bash
 dokcer tag <IMAGE_ID> <USER_NAME>/<IMAGE_NAME:TAG>
@@ -210,4 +213,5 @@ kubectl expose pod object-detection --type=NodePort --port=80
 kubectl describe service object-detection
 ```
 
-5. Use `https://<PUBLIC_IP>:<NODEPORT_NUMBER>` to access the microservice
+
+**Congrats! Use `https://<PUBLIC_IP>:<NODEPORT_NUMBER>` to access the microservice**

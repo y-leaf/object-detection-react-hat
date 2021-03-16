@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: object-detection
+  labels:
+    app: object-detection
+spec:
+  containers:
+  - name: object-detection-react
+    image: wakabaunoibm/object-detection-react:v0.0.1
+    ports:
+     - containerPort: 3000
+    env:
+     - name: HOST_IP
+       value: 159.122.186.132
+     - name: SCHEME
+       value: http
+  - name: object-detection-nginx
+    image: wakabaunoibm/object-detection-nginx:v0.0.1
+    ports:
+    - containerPort: 80
+      containerPort: 443
+    volumeMounts:
+    - name: nginx-config
+      mountPath: /etc/nginx/nginx.conf
+      subPath: nginx.conf
+  volumes:
+  - name: nginx-config
+    configMap:
+      name: object-detection-nginx-conf

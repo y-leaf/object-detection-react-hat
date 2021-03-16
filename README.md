@@ -1,5 +1,7 @@
 # Object Detection React App (detect hat)
 
+![Overall Flow](flow_image.png)
+
 You can find an in depth walkthrough for training a TensorFlow.js model [here](https://github.com/cloud-annotations/training/).
 
 

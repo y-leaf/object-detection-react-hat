@@ -4,10 +4,10 @@ You can find an in depth walkthrough for training a TensorFlow.js model [here](h
 
 
 # Prerequisites
-You need to have the following installed to complete the steps in this code pattern:
+You need to have the following installed to complete the steps below:
 
 * [Docker](https://www.docker.com/products/docker-desktop)
-* [IBM Cloud Kubernetes Service Provisioned](https://www.ibm.com/cloud/container-service)
+* [IBM Cloud Kubernetes Service Provisioned (Lite cluster)](https://www.ibm.com/cloud/container-service)
 
 For running these services locally without Docker containers, you need:
 
@@ -49,8 +49,9 @@ $ cd object-detection-react-hat
 Follow these steps to set up and run this code pattern locally and on the cloud. The steps are described in detail below.
 
 1. [Run the application locally](#1-run-the-application-locally)
-2. [Build a docker image, then run it locally](#2-Build-a-docker-image-then-run-it-locally)
-3. [Deploy to IBM Cloud Kubernetes Service](#3-deploy-to-ibm-cloud-kubernetes-service)
+2. [Create Self-Signed SSL Certificate for nginx container](#2-create-self-signed-ssl-certificate-for-nginx-container)
+3. [Build a docker image, then run it locally usign docker-compose](#3-Build-a-docker-image-then-run-it-locally-using-docker-compose)
+4. [Deploy to IBM Cloud Kubernetes Service](#4-deploy-to-ibm-cloud-kubernetes-service)
 
 
 --------------------
@@ -72,9 +73,63 @@ if you have your own TensorFlow.js model, copy the `model_web` directory generat
 
 --------------------
 
-### 2. Build a docker image, then run it locally
+### 2. Create Self-Signed SSL Certificate for nginx container
+Since this app requires to access to the client's PC camera, you need to create self-signed SSL for secure connection.
+
+While setting up a SSL certificate, a private key and a Certificate Signing Request (CSR) must be generated to pass information between the Certificate Authority and web host. Once the CSR has been created it will generate a Certificate (CRT).
+
+1. Preparation
+
+# < Install OpenSSL >
+Confirm if you have already installed
+
+```bash
+openssl --version
+```
+
+if you haven't, install it by:
+
+```bash
+sudo yum install -y openssl
+```
+
+# <Create a directory for SSL>
+
+```bash
+cd ./nginx
+mkdir ssl
+cd ssl
+```
+
+2. Creat Private Key
+
+```bash
+openssl genrsa -out server.key 3072
+```
+
+3. Create CSR (Certificate Signing Request)
+
+```bash
+openssl req -new -key server.key -out server.csr
+```
+
+You will be asked to input several information such as Contry Name and Organization name, you can simply skip them by typing 'Enter'.
+
+4. Generate CRT (Certification)
+
+```bash
+openssl x509 -days 3650 -req -signkey server.key -in server.csr -out server.crt
+```
+
+# Congratulations! Now you have Self-Signed SSL Certificate for nginx container.
+
+
+--------------------
+
+### 3. Build a docker image, then run it locally using docker-compose
 
 1. Make sure you are at the root of this application.
+
 2. Note your docker-hub username
 <details><summary><strong>How to find your docker hub credentials</strong></summary>
 
@@ -88,43 +143,21 @@ if you have your own TensorFlow.js model, copy the `model_web` directory generat
 
 ```bash
 export DOCKERHUB_USERNAME=<your-dockerhub-username>
-docker build -t $DOCKERHUB_USERNAME/object-detection-react:v0.0.1 .
+docker-compose build
+docker-compose up -d
 ```
 
-
-Great!  So, now lets run the image locally!
-
-```bash
- docker run -p 4001:4001 grantsteinfeldibm/currencyexchange:v0.0.1
-```
-
-
-You should now see the object-detection microservice up and running
+Great!  So, now you should now see the object-detection microservice up and running
 
 Explore the microservice at
->  [http://localhost:3000](http://localhost:3000) for documentation
+>  [https://localhost](https://localhost)
 
 
 --------------------
 
-### 3. Deploy to IBM Cloud Kubernetes Service
+### 4. Deploy to IBM Cloud Kubernetes Service
 
-1. To allow changes to the this microservice, create a repo on [Docker Cloud](https://cloud.docker.com/) where you can push the new modified containers. 
-
-> NOTE: If a new repo is used for the Docker containers, the container `image` will need to be modified to the name of the new repo used in [object-detection-deploy.yaml](object-detection-deploy.yaml).
-
-```bash
-export DOCKERHUB_USERNAME=<your-dockerhub-username>
-
-docker build -t $DOCKERHUB_USERNAME/object-detection-react:v0.0.1 .
-
-docker login
-
-docker push $DOCKERHUB_USERNAME/object-detection-react:v0.0.1
-
-```
-
-2. Provision an [IBM Cloud Kubernetes Service (Lite)](https://cloud.ibm.com/kubernetes/catalog/cluster).
+1. Provision an [IBM Cloud Kubernetes Service](https://cloud.ibm.com/kubernetes/catalog/cluster).
 
 * Login to the IBM Cloud using the [Developer Tools CLI](https://www.ibm.com/cloud/cli):
 > NOTE use `--sso` if you have a single sign on account, or delete for username/password login
@@ -140,21 +173,39 @@ ibmcloud cs cluster-config --cluster <$CLUSTER_NAME OR $CLUSTER_ID>
 ```
 
 
-#### Lite Cluster Instructions
+2. Edit 'object-detection-deploy.yaml'
 
-3. Run `bx cs workers --cluster <$CLUSTER_NAME>` and locate and take note of the `Public IP`. This IP is used to access the currency service API. 
+* Run `bx cs workers --cluster <$CLUSTER_NAME>` and locate and take note of the `Public IP`. This IP is used to access the currency service API. 
 
-Update the `env` values `HOST_IP` and `SCHEME` in [object-detection-deploy.yaml](object-detection-deploy.yaml) 
-to the `<PUBLIC_IP>:32001` and `http`.
+Update the `env` values `HOST_IP` in line #15 of [object-detection-deploy.yaml](object-detection-deploy.yaml)
+to the `<PUBLIC_IP>`.
+
+* Run `docker images` and confirm you have two images for this app, note your images' names.
+
+Update the `containers` values `name`in line #9, 18 of [object-detection-deploy.yaml](object-detection-deploy.yaml)
+to the `<IMAGE_NAME:TAG>`.
+
+> NOTE change images' names to pull the images to the kubernetes clusters if the images don't have the specified user name.
+
+```bash
+dokcer tag <IMAGE_ID> <USER_NAME>/<IMAGE_NAME:TAG>
+```
+
 
 4. To deploy the services to the IBM Cloud Kubernetes Service, run:
 
 ```bash
-kubectl apply -f object-detection-deploy.yaml
-
+kubectl create -f object-detection-nginx.yaml
+kubectl apply -f object-detection-nginx.yaml
 
 ## Confirm the services are running - this may take a minute
 kubectl get pods
+
+## Expose the pod using NodePprt
+kubectl expose pod object-detection --type=NodePort --port=80
+
+## Define the NodePort number 
+kubectl describe service object-detection
 ```
 
-5. Use `http://<PUBLIC_IP>:32001` to access the microservice
+5. Use `https://<PUBLIC_IP>:<NODEPORT_NUMBER>` to access the microservice

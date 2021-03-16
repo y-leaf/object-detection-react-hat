@@ -1,43 +1,30 @@
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: object-detection-react
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: object-detection-react-deployment
-  template:
-    metadata:
-      labels:
-        app: object-detection-react-deployment
-        version: v1
-    spec:
-      containers:
-        - name: objection-detection-react
-          image: wakabaunoibm/object-detection-react:v0.0.1
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 3000
-          # add below
-          env:
-            - name: HOST_IP
-              value: <PUBLIC_IP>
-            - name: SCHEME
-              value: http
-
----
 apiVersion: v1
-kind: Service
+kind: Pod
 metadata:
-  name: object-detection-react-service
+  name: object-detection
+  labels:
+    app: object-detection
 spec:
-  ports:
-    - port: 3000
-      targetPort: 3000
-      nodePort: 32001
-      name: http
-  type: NodePort
-  selector:
-    app: object-detection-react-deployment
+  containers:
+  - name: object-detection-react
+    image: wakabaunoibm/object-detection-react:v0.0.1
+    ports:
+     - containerPort: 3000
+    env:
+     - name: HOST_IP
+       value: 159.122.186.132
+     - name: SCHEME
+       value: http
+  - name: object-detection-nginx
+    image: wakabaunoibm/object-detection-nginx:v0.0.1
+    ports:
+    - containerPort: 80
+      containerPort: 443
+    volumeMounts:
+    - name: nginx-config
+      mountPath: /etc/nginx/nginx.conf
+      subPath: nginx.conf
+  volumes:
+  - name: nginx-config
+    configMap:
+      name: object-detection-nginx-conf
